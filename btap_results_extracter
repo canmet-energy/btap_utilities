@@ -1,4 +1,4 @@
-#!~/.rbenv/shims/ruby
+#!/home/nrcan/.rbenv/shims/ruby
 require 'zlib'
 require 'base64'
 require 'csv'
