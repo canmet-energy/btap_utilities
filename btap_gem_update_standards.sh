@@ -5,5 +5,5 @@ cd /home/nrcan/btap_utilities \
 && git checkout migrate_necb_loads_to_standards \
 && /home/nrcan/.rbenv/shims/bundle install \
 && /home/nrcan/.rbenv/shims/rake install \
-&& cd /home/nrcan/btap_utilities
+&& cd /home/nrcan/btap_utilities \
 && rm -fr openstudio-standards
