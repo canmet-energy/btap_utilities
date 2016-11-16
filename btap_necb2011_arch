@@ -6,6 +6,7 @@ require 'optparse'
 require 'yaml'
 require 'openstudio'
 require 'openstudio-standards'
+require 'parallel'
 
 options = {}
 
@@ -113,18 +114,29 @@ Weather_files = [
 
 OptionParser.new do |opts|
   opts.banner = "Usage: btap_archetypes -b ListofBuildings -e ListofEPWs 
+  This will output the model files to ./output. It will overwrite any 
+  files in this folder if it exists. For large simulations, please use 
+  OpenStudio Spreadsheet or PAT 2.0. 
   Examples: 
   *Run a single building against a single weather file. 
-  btap_necb2011_arch.rb -b 'SmallHotel' -e 'CAN_BC_Vancouver.718920_CWEC.epw'
+  btap_necb2011_arch -b 'SmallHotel' -e 'CAN_BC_Vancouver.718920_CWEC.epw'
 
   *Run two buildings against two weather files (4 simulations) 
-  btap_necb2011_arch.rb -b 'SmallHotel','PrimarySchool' -e 'CAN_BC_Vancouver.718920_CWEC.epw','CAN_AB_Edmonton.711230_CWEC.epw'  
+  btap_necb2011_arch -b 'SmallHotel','PrimarySchool' -e 'CAN_BC_Vancouver.718920_CWEC.epw','CAN_AB_Edmonton.711230_CWEC.epw' 
+
+  *Run all buildings against a weather files 
+  btap_necb2011_arch -b 'All' -e 'CAN_BC_Vancouver.718920_CWEC.epw'
+
+  *Create all buildings against all weather files. but don't simulate
+  btap_necb2011_arch.rb -b 'All' -e 'All' -d
+
+
   
   *Show list of buildings available
-  btap_necb2011_arch.rb -l
+  btap_necb2011_arch -l
   
   *Show list of buildings available
-  btap_necb2011_arch.rb -w
+  btap_necb2011_arch -w
   "
   opts.on("-b", "--building_type a,b,c", Array, "Array of building_types") { |a| options[:building_types] = a.map { |v| v.to_s } }
   opts.on("-e", "--epw_files a,b,c", Array, "Array of epw_files") { |a| options[:epw_files] = a.map { |v| v.to_s } }
@@ -203,26 +215,22 @@ class CmdCreateDOEPrototypeBuilding
       compare_results = true,
       debug = false)
 
-    
+    sim_array = []
     building_types.each do |building_type|
       templates.each do |template|
         climate_zones.each do |climate_zone|
-          #need logic to go through weather files only for Canada's NECB 2011. It will ignore the ASHRAE climate zone. 
-          if template == 'NECB 2011'
             epw_files.each do |epw_file|
-              create_building(building_type, template, climate_zone, epw_file, create_models, run_models, compare_results, debug )
+              sim = []
+              sim << building_type <<  template << climate_zone << epw_file
+              sim_array << sim
             end 
-          else
-            #otherwise it will go as normal with the american method. 
-            epw_file = ""
-            create_building(building_type, template, climate_zone, epw_file, create_models, run_models, compare_results, debug )
-          end
-          
-          
         end
       end
     end  
- 
+    Parallel.each(sim_array) do |sim|
+    building_type,   template,  climate_zone, epw_file = sim 
+    create_building(building_type, template, climate_zone, epw_file, create_models, run_models, compare_results, debug )
+    end
   end
   
   def create_building(building_type, 
@@ -345,6 +353,9 @@ end
 cmd = CmdCreateDOEPrototypeBuilding.new
 building_types = options[:building_types]
 epw_files = options[:epw_files]
+epw_files = Weather_files if epw_files.first.downcase == 'all'
+building_types = Buildings if building_types.first.downcase == 'all'
+
 cmd.create_run_model(building_types, 
       ['NECB 2011'], 
       ['NECB HDD Method'], 
