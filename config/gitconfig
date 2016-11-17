@@ -16,6 +16,7 @@
   ci = commit
   st = status
   br = branch
+  conflicts = diff --name-only --diff-filter=U
   hist = log --pretty=format:\"%C(yellow)%h %ad | %C(reset)%sd %C(green)[%an]\" --date=short --graph
   type = cat-file -t
   dump = cat-file -p
