@@ -32,18 +32,19 @@ open(csvfile) do |csv|
     if is_header
       is_header = false
       values.each_with_index do |val,index|
-        osm_zip_index = index if val.strip == "btapresults.zipped_model_osm"
+        osm_zip_index = index if val.strip ==  "btapresults.zipped_model_osm"
         view_zip_index = index if val.strip == "view_model.zipped_view_model_html"
         name = index if val.strip == "name"
       end
       raise("Could not find name or btapresults.zipped_model_osm column in csv file.") if name < 0 or osm_zip_index < 0 or view_zip_index < 0
     else
-      osm_string =  Zlib::Inflate.inflate(Base64.strict_decode64( values[ osm_zip_index ].strip ) )
-      view_string = Zlib::Inflate.inflate(Base64.strict_decode64( values[ view_zip_index ].strip) )
+
       puts "Writing #{values[name]}.osm"
+      osm_string =  Zlib::Inflate.inflate(Base64.strict_decode64( values[ osm_zip_index ].strip ) )
       File.open("#{output_folder}/#{values[name]}.osm", 'w') {|f| f.write(osm_string) }
-      
+
       puts "Writing #{values[name]}_3d.html"
+      view_string = Zlib::Inflate.inflate(Base64.strict_decode64( values[ view_zip_index ].strip) )
       File.open("#{output_folder}/#{values[name]}_3d.html", 'w') {|f| f.write(view_string) }
 
       osm_counter +=1
