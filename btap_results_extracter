@@ -23,6 +23,7 @@ FileUtils::mkdir_p(output_folder)
 osm_zip_index = -999
 view_zip_index = -999
 name = -999
+id = -999
 osm_counter = 0
 csvfile = options[:filename]
 open(csvfile) do |csv|
@@ -32,20 +33,21 @@ open(csvfile) do |csv|
     if is_header
       is_header = false
       values.each_with_index do |val,index|
-        osm_zip_index = index if val.strip ==  "btapresults.zipped_model_osm"
-        view_zip_index = index if val.strip == "view_model.zipped_view_model_html"
+        osm_zip_index = index if val.strip ==  "btapresults.model_osm_zip"
+        view_zip_index = index if val.strip == "view_model.view_model_html_zip"
         name = index if val.strip == "name"
+        id = index if val.strip == "_id"
       end
       raise("Could not find name or btapresults.zipped_model_osm column in csv file.") if name < 0 or osm_zip_index < 0 or view_zip_index < 0
     else
 
-      puts "Writing #{values[name]}.osm"
+      puts "Writing #{values[id]}.osm"
       osm_string =  Zlib::Inflate.inflate(Base64.strict_decode64( values[ osm_zip_index ].strip ) )
-      File.open("#{output_folder}/#{values[name]}.osm", 'w') {|f| f.write(osm_string) }
+      File.open("#{output_folder}/#{values[id]}.osm", 'w') {|f| f.write(osm_string) }
 
-      puts "Writing #{values[name]}_3d.html"
+      puts "Writing #{values[id]}_3d.html"
       view_string = Zlib::Inflate.inflate(Base64.strict_decode64( values[ view_zip_index ].strip) )
-      File.open("#{output_folder}/#{values[name]}_3d.html", 'w') {|f| f.write(view_string) }
+      File.open("#{output_folder}/#{values[id]}_3d.html", 'w') {|f| f.write(view_string) }
 
       osm_counter +=1
     end
