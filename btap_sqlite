@@ -7,7 +7,7 @@ require 'optparse'
 require 'yaml'
 require 'sqlite3'
 require 'json'
-require 'diff_match_patch'
+#require 'diff_match_patch'
 
 def self.unlock(lockfile)
    if File.exist?(lockfile) then File.delete(lockfile) end
@@ -27,11 +27,9 @@ output_folder = "./osm_files"
 output_error="#{output_folder}/error.txt"
 FileUtils::mkdir_p(output_folder)
 unlock('simulations.btap')
-
-    
-    db = SQLite3::Database.open "simulations.btap"
-
-    db.execute "CREATE TABLE IF NOT EXISTS Simulations( Id TEXT PRIMARY KEY,
+simulations = []
+db = SQLite3::Database.open "simulations.btap"
+db.execute "CREATE TABLE IF NOT EXISTS Simulations( Id TEXT PRIMARY KEY,
                                                         baseline INTEGER,
                                                         necb2011_tests INTEGER,
                                                         building_type TEXT,
@@ -67,12 +65,18 @@ CSV.foreach(options[:filename], headers: true) do |row|
   baseline = 1
   necb2011_tests = 0
 
+  
+
+
   #db.execute "SELECT json();"
   db.execute("INSERT INTO Simulations VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",[ id, baseline, necb2011_tests, building_type, city, province,hdd,climate_zone, total_electricity_eui, total_natural_gas_eui, osm_file_zip, btap_json.to_json, view_model_file_zip]) 
+  btap_json['building_type'] = building_type
+  
+  simulations << btap_json
 
   
 end
-
+File.open('simuations.json', 'w') {|f| f.write(simulations.to_json) }
 
     db.close if db
 
