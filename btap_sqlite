@@ -7,7 +7,7 @@ require 'optparse'
 require 'yaml'
 require 'sqlite3'
 require 'json'
-require 'diff_match_patch'
+#require 'diff_match_patch'
 
 def self.unlock(lockfile)
    if File.exist?(lockfile) then File.delete(lockfile) end
@@ -27,11 +27,9 @@ output_folder = "./osm_files"
 output_error="#{output_folder}/error.txt"
 FileUtils::mkdir_p(output_folder)
 unlock('simulations.btap')
-
-    
-    db = SQLite3::Database.open "simulations.btap"
-
-    db.execute "CREATE TABLE IF NOT EXISTS Simulations( Id TEXT PRIMARY KEY,
+simulations = []
+db = SQLite3::Database.open "simulations.btap"
+db.execute "CREATE TABLE IF NOT EXISTS Simulations( Id TEXT PRIMARY KEY,
                                                         baseline INTEGER,
                                                         necb2011_tests INTEGER,
                                                         building_type TEXT,
@@ -46,10 +44,6 @@ unlock('simulations.btap')
                                                         view_model TEXT)"
 
 simulations = []
-
-
-
-
 CSV.foreach(options[:filename], headers: true) do |row|
   osm_file_zip = if row["btapresults.model_osm_zip"].nil? then nil else row["btapresults.model_osm_zip"].strip end
   osm_string =  Zlib::Inflate.inflate(Base64.strict_decode64( osm_file_zip )) unless osm_file_zip.nil?
@@ -72,7 +66,7 @@ CSV.foreach(options[:filename], headers: true) do |row|
   total_natural_gas_eui = 0.0
   baseline = 1
   necb2011_tests = 0
-    #btap_json['building'] = []
+  #btap_json['building'] = []
   #btap_json['geography'] = []
   #btap_json['spacetype_area_breakdown'] = []
   #btap_json['economics'] = []
@@ -97,14 +91,14 @@ CSV.foreach(options[:filename], headers: true) do |row|
 
   btap_json['run_uuid'] = id
   btap_json['building_type'] = building_type
-  simulations << btap_json
+
   #db.execute "SELECT json();"
   db.execute("INSERT INTO Simulations VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",[ id, baseline, necb2011_tests, building_type, city, province,hdd,climate_zone, total_electricity_eui, total_natural_gas_eui, osm_file_zip, btap_json.to_json, view_model_file_zip]) 
-
   
+  simulations << btap_json
 end
-db.close if db
 #puts simulations.to_json
-File.open("simulations.json", 'w') {|f| f.write(JSON.pretty_generate(simulations)) }
+File.open('simuations.json', 'w') {|f| f.write(simulations.to_json) }
+db.close if db
 puts "Stripped OSM data from #{options[:filename]} and saved result to ./osm_file/output.csv. \nNow useable by Excel"
 puts "completed in #{Time.now - start} secs"
