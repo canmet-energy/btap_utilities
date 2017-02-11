@@ -27,6 +27,7 @@ output_folder = "./osm_files"
 output_error="#{output_folder}/error.txt"
 FileUtils::mkdir_p(output_folder)
 unlock('simulations.btap')
+unlock('simulations.json')
 simulations = []
 db = SQLite3::Database.open "simulations.btap"
 db.execute "CREATE TABLE IF NOT EXISTS Simulations( Id TEXT PRIMARY KEY,
@@ -83,7 +84,13 @@ CSV.foreach(options[:filename], headers: true) do |row|
   
   #btap_json['air_loops'] = []
   #btap_json['plant_loops'] = []
-  btap_json['eplusout_err'] = []
+
+
+
+  btap_json['eplusout_err']['warnings'] = btap_json['eplusout_err']['warnings'].size
+  btap_json['eplusout_err']['severe'] = btap_json['eplusout_err']['warnings'].size
+  btap_json['eplusout_err']['fatal'] = btap_json['eplusout_err']['warnings'].size
+
   #btap_json['ruby_warnings'] = []
   #btap_json['information'] = []
   #btap_json['warnings'] = []
@@ -98,7 +105,7 @@ CSV.foreach(options[:filename], headers: true) do |row|
   simulations << btap_json
 end
 #puts simulations.to_json
-File.open('simuations.json', 'w') {|f| f.write(simulations.to_json) }
+File.open('simulations.json', 'w') {|f| f.write(simulations.to_json) }
 db.close if db
 puts "Stripped OSM data from #{options[:filename]} and saved result to ./osm_file/output.csv. \nNow useable by Excel"
 puts "completed in #{Time.now - start} secs"
