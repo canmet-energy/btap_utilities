@@ -45,12 +45,18 @@ unlock('simulations.btap')
                                                         btap_json TEXT,
                                                         view_model TEXT)"
 
+simulations = []
+
+
+
+
 CSV.foreach(options[:filename], headers: true) do |row|
   osm_file_zip = if row["btapresults.model_osm_zip"].nil? then nil else row["btapresults.model_osm_zip"].strip end
   osm_string =  Zlib::Inflate.inflate(Base64.strict_decode64( osm_file_zip )) unless osm_file_zip.nil?
 
   btap_json_file_zip = if row["btapresults.btap_results_json_zip"].nil? then nil else row["btapresults.btap_results_json_zip"].strip end
   btap_json =  JSON.parse(Zlib::Inflate.inflate(Base64.strict_decode64( btap_json_file_zip ))) unless btap_json_file_zip.nil?
+  
 
   view_model_file_zip =   if row["view_model.view_model_html_zip"].nil? then nil else row["view_model.view_model_html_zip"].strip end
   view_model =  Zlib::Inflate.inflate(Base64.strict_decode64( view_model_file_zip )) unless view_model_file_zip.nil?
@@ -66,16 +72,39 @@ CSV.foreach(options[:filename], headers: true) do |row|
   total_natural_gas_eui = 0.0
   baseline = 1
   necb2011_tests = 0
+    #btap_json['building'] = []
+  #btap_json['geography'] = []
+  #btap_json['spacetype_area_breakdown'] = []
+  #btap_json['economics'] = []
 
+  #btap_json['end_uses'] = []
+  #btap_json['end_uses_eui'] = []
+  #btap_json['meter_peaks'] = []
+  #btap_json['unmet_hours'] = []
+
+  #btap_json['service_water_heating'] = []
+  #btap_json['envelope'] = []
+  #btap_json['spaces'] = []
+  #btap_json['thermal_zones'] = []
+  
+  #btap_json['air_loops'] = []
+  #btap_json['plant_loops'] = []
+  btap_json['eplusout_err'] = []
+  #btap_json['ruby_warnings'] = []
+  #btap_json['information'] = []
+  #btap_json['warnings'] = []
+  #btap_json['errors'] = []
+
+  btap_json['run_uuid'] = id
+  btap_json['building_type'] = building_type
+  simulations << btap_json
   #db.execute "SELECT json();"
   db.execute("INSERT INTO Simulations VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",[ id, baseline, necb2011_tests, building_type, city, province,hdd,climate_zone, total_electricity_eui, total_natural_gas_eui, osm_file_zip, btap_json.to_json, view_model_file_zip]) 
 
   
 end
-
-
-    db.close if db
-
-
+db.close if db
+#puts simulations.to_json
+File.open("simulations.json", 'w') {|f| f.write(JSON.pretty_generate(simulations)) }
 puts "Stripped OSM data from #{options[:filename]} and saved result to ./osm_file/output.csv. \nNow useable by Excel"
 puts "completed in #{Time.now - start} secs"
