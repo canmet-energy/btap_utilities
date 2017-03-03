@@ -4,6 +4,6 @@ cd /home/nrcan/btap_utilities \
 && cd openstudio-standards/openstudio-standards/ \
 && git checkout nrcan \
 && /home/nrcan/.rbenv/shims/bundle install \
-&& /home/nrcan/.rbenv/shims/rake install \
+&& /home/nrcan/.rbenv/shims/bundle exec rake install \
 && cd /home/nrcan/btap_utilities \
 && rm -fr openstudio-standards
