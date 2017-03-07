@@ -58,6 +58,7 @@ CSV.foreach(options[:filename], headers: true) do |row|
 
   id = row["_id"].strip
   building_type = row["create_doe_prototype_building.building_type"].strip
+  template = row["create_doe_prototype_building.template"].strip
   city = btap_json['geography']['city']
   province = btap_json['geography']['state_province_region']
   hdd = btap_json['geography']['hdd']
@@ -98,7 +99,7 @@ CSV.foreach(options[:filename], headers: true) do |row|
 
   btap_json['run_uuid'] = id
   btap_json['building_type'] = building_type
-
+  btap_json['template'] = template
   #db.execute "SELECT json();"
   db.execute("INSERT INTO Simulations VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",[ id, baseline, necb2011_tests, building_type, city, province,hdd,climate_zone, total_electricity_eui, total_natural_gas_eui, osm_file_zip, btap_json.to_json, view_model_file_zip]) 
   
