@@ -1,9 +1,9 @@
 #!/bin/bash
-cd /home/nrcan/btap_utilities \
+cd ~/btap_utilities \
 && git clone https://github.com/NREL/openstudio-standards.git \
 && cd openstudio-standards/openstudio-standards/ \
 && git checkout nrcan \
-&& /home/nrcan/.rbenv/shims/bundle install \
-&& /home/nrcan/.rbenv/shims/bundle exec rake install \
-&& cd /home/nrcan/btap_utilities \
+&& bundle install \
+&& bundle exec rake install \
+&& cd ~/btap_utilities \
 && rm -fr openstudio-standards
