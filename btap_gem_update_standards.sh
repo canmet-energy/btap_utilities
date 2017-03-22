@@ -14,5 +14,5 @@ else
 fi
 cd /tmp/openstudio-standards/openstudio-standards 
 git checkout nrcan 
-/usr/local/rbenv/shims/bundle install
-/usr/local/rbenv/shims/bundle exec rake install
+bundle install
+bundle exec rake install
