@@ -4,7 +4,10 @@
 The above line is added to the crontab file after executing `crontab -e` 
 
 A file with the following contents are stored as `after_reboot.sh` in the home directory. 
-This script will be run by cron after reboot on ELMO. This script will erase ALL docker containers and create the dataviz and run necb standards test.
+
+This script will be executed by cron after ELMO is rebooted. 
+
+This script will erase ALL docker containers and create the dataviz and run necb standards test.
 
 ````shell
 docker stop $(docker ps -a -q)
