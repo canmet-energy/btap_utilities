@@ -1,21 +1,32 @@
-````shell
+The purpose of this document is to explain the automation processess of
++ running NECB standards' QAQC (Quality Assurance, Quality Control) tests to generate the simulations.json, and
++ have the latest parallel coordinate data viz running on Elmo.
+
+New results for NECB test and data viz has to be updated everyday. The NECB test should run if the repository gets updated.
+This processess should start even if Elmo is has been restarted.
+
+Every time Elmo is restarted, it should start the docker container for the data viz and NECB test container. This can be achieved by writing a script that will update and start and update the docker containers. This script will get executed by cron when Elmo is restarted. This is done by adding the following line to the file after executing `crontab -e`, where `/home/nrcan/after_reboot.sh` is the absolute path of the script file to be executed.
+
+```shell
 @reboot /home/nrcan/after_reboot.sh
-````
-The above line is added to the crontab file after executing `crontab -e` 
+```
+The following script will stop and erase all the docker containers and recreate the dataviz and necb test container.
 
-A file with the following contents are stored as `after_reboot.sh` in the home directory. 
-
-This script will be executed by cron after ELMO is rebooted. 
-
-This script will erase ALL docker containers and create the dataviz and run necb standards test.
-
-````shell
+```shell
+#stop and erase all the docker containers
 docker stop $(docker ps -a -q)
 docker rm $(docker ps -a -q)
-cd ~/parallel-coordinates/
-git pull
+# navigate to the root of the data viz directory and update the repository
+cd ~/parallel-coordinates/ && git pull
+# build the container fron scratch
 docker build -t nodeserver .
+#map the port to 8080 and run the node server
 docker run -d -p 8080:8080 --name node nodeserver
 cd ~/projects/btap-test-necb
+#pull the latest canmet/btap-test-necb image from docker hub, and run it
 docker run --name necb -d -it canmet/btap-test-necb
-````
+```
+
+Source:
+NECB test container: https://github.com/canmet-energy/btap-test-necb
+Data viz: https://github.com/canmet-energy/parallel-coordinates
