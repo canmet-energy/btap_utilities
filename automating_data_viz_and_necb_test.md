@@ -28,5 +28,6 @@ docker run --name necb -d -it canmet/btap-test-necb
 ```
 
 Source:
-NECB test container: https://github.com/canmet-energy/btap-test-necb
-Data viz: https://github.com/canmet-energy/parallel-coordinates
++ NECB test container: https://github.com/canmet-energy/btap-test-necb
+  * The NECB test container has an inside cron job that runs the necb tests everyday at 6PM if the Openstudio-Standards repository gets updated
++ Data viz: https://github.com/canmet-energy/parallel-coordinates
