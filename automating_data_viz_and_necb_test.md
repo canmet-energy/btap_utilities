@@ -1,3 +1,5 @@
+## Documentation of automating the update process of necb test and data viz.
+
 The purpose of this document is to explain the automation processess of
 + running NECB standards' QAQC (Quality Assurance, Quality Control) tests to generate the simulations.json, and
 + have the latest parallel coordinate data viz running on Elmo.
