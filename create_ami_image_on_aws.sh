@@ -5,6 +5,8 @@ VERSION=2.4.3
 EXTENSION=nrcan-dl-rc0
 TAG=$VERSION-$EXTENSION
 SERVER_BRANCH=pad_nrcan_2.4.3
+# if the SERVER_SHA is left as '', the server corresponding to the
+# latest commit on that branch will be made
 SERVER_SHA=''
 
 read -p "Docker Username:" DOCKER_USER_ID
