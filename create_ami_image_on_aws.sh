@@ -56,7 +56,7 @@ sudo docker push canmet/openstudio-rserve:$TAG
 sudo docker push canmet/openstudio-server:$TAG
 
 #Create Amazon AMI
-cd ci/gitlab
+cd docker/deployment
 sudo pip install -r requirements.txt
 cp ../../docker/deployment/openstudio_server_docker_base.json .
 cp ../../docker/deployment/user_variables.json.template .
